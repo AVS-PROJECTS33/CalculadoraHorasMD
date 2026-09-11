@@ -1,1 +1,348 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Calculadora Horas Extras - Logística</title>
+    <!-- Cargamos Tailwind CSS para los estilos -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Configuración para que Tailwind reconozca nuestro botón de Modo Oscuro
+        tailwind.config = {
+            darkMode: 'class'
+        }
+    </script>
+    <style>
+        /* Pequeño ajuste para que los inputs numéricos no muestren las flechas por defecto en algunos navegadores */
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 dark:bg-slate-900 dark:text-slate-200 font-sans min-h-[100dvh] flex flex-col p-4 transition-colors duration-200 overflow-y-auto">
 
+    <div class="m-auto bg-white dark:bg-slate-800 rounded-2xl shadow-xl w-full max-w-md overflow-hidden transition-colors duration-200">
+        <div class="bg-teal-600 p-6 text-white text-center relative">
+            <!-- Botón de cambio de vista (Conversor) -->
+            <button id="view-toggle" class="absolute top-4 left-4 p-2 rounded-full bg-teal-700/50 hover:bg-teal-700 transition-colors flex items-center justify-center" title="Conversor Base 100 a 60">
+                <svg id="icon-converter" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
+                <svg id="icon-back" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+            </button>
+
+            <!-- Botón Dark Mode -->
+            <button id="theme-toggle" class="absolute top-4 right-4 p-2 rounded-full bg-teal-700/50 hover:bg-teal-700 transition-colors" title="Cambiar modo claro/oscuro">
+                <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+                <svg id="theme-toggle-light-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
+            </button>
+            <h1 id="main-title" class="text-2xl font-bold mt-2">Calculadora de Horas</h1>
+            <p id="main-subtitle" class="text-teal-100 text-sm mt-1">Massimo Dutti Logística</p>
+        </div>
+
+        <!-- VISTA: CALCULADORA -->
+        <div id="view-calculator" class="p-6 space-y-5">
+            <!-- Grupo / Puesto -->
+            <div>
+                <label for="puesto" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Puesto de trabajo</label>
+                <select id="puesto" class="w-full border border-slate-300 dark:border-slate-600 rounded-lg p-3 bg-slate-50 dark:bg-slate-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors">
+                    <option value="logistica">Operario Logística (Grupo I)</option>
+                    <option value="especializado">Operario Especializado (Grupo II)</option>
+                    <option value="torista">Operario Torista (Grupo II)</option>
+                </select>
+            </div>
+
+            <!-- Año -->
+            <div>
+                <label for="anyo" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Año</label>
+                <select id="anyo" class="w-full border border-slate-300 dark:border-slate-600 rounded-lg p-3 bg-slate-50 dark:bg-slate-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors">
+                    <option value="2026">2026</option>
+                    <option value="2027">2027</option>
+                </select>
+            </div>
+
+            <!-- Tipo de Hora -->
+            <div>
+                <label for="tipo_hora" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Tipo de Hora</label>
+                <select id="tipo_hora" class="w-full border border-slate-300 dark:border-slate-600 rounded-lg p-3 bg-slate-50 dark:bg-slate-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors text-sm">
+                    <option value="ordinaria">Hora Ordinaria</option>
+                    <option value="extra">Hora Extraordinaria (175% p.h.o)</option>
+                    <option value="extra_festiva">Hora extraordinaria festiva (200% p.h.o)</option>
+                    <option value="nocturna">Hora Nocturna (Ordinaria + 45%)</option>
+                </select>
+            </div>
+
+            <!-- Cantidad de Horas -->
+            <div>
+                <label for="cantidad" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Horas realizadas</label>
+                <input type="number" id="cantidad" placeholder="Ej: 4.5" step="0.5" min="0" class="w-full border border-slate-300 dark:border-slate-600 rounded-lg p-3 bg-slate-50 dark:bg-slate-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors text-lg font-semibold">
+            </div>
+
+            <!-- Separador -->
+            <div class="border-t border-slate-200 dark:border-slate-700 pt-5 mt-2"></div>
+
+            <!-- Resultados -->
+            <div class="bg-teal-50 dark:bg-slate-700/50 rounded-xl p-5 border border-teal-100 dark:border-slate-600">
+                <div class="flex justify-between items-center mb-4">
+                    <span class="text-slate-600 dark:text-slate-300 font-medium">Total a percibir:</span>
+                    <span id="resultado_euros" class="text-3xl font-bold text-teal-700 dark:text-teal-400">0.00 €</span>
+                </div>
+                
+                <div class="flex justify-between items-center">
+                    <span class="text-slate-600 dark:text-slate-300 font-medium">Tiempo a compensar:</span>
+                    <div class="text-right">
+                        <span id="resultado_compensar" class="text-xl font-bold text-orange-600 dark:text-orange-400">--</span>
+                        <p id="compensar_info" class="text-xs text-slate-500 dark:text-slate-400 mt-1">Introduce horas para calcular</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center text-xs text-slate-400 dark:text-slate-500 mt-4">
+                Valor hora aplicada: <span id="valor_hora_info" class="font-semibold">0.00 €</span>
+            </div>
+        </div>
+
+        <!-- VISTA: CONVERSOR -->
+        <div id="view-converter" class="p-6 space-y-5 hidden">
+            <div class="bg-teal-50 dark:bg-slate-700/50 border border-teal-100 dark:border-slate-600 rounded-xl p-4 mb-2">
+                <p class="text-sm text-slate-600 dark:text-slate-300 text-center">
+                    Convierte las horas del sistema (Base 100) a horas y minutos reales de reloj (Base 60).
+                </p>
+            </div>
+            
+            <div>
+                <label for="horas_decimales" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2 text-center">Introduce el número en decimales</label>
+                <input type="number" id="horas_decimales" placeholder="Ej: 1.75 o 2.25" step="0.01" min="0" class="w-full border border-slate-300 dark:border-slate-600 rounded-lg p-4 bg-slate-50 dark:bg-slate-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors text-3xl font-bold text-center shadow-inner">
+            </div>
+            
+            <!-- Separador -->
+            <div class="border-t border-slate-200 dark:border-slate-700 pt-5 mt-4"></div>
+            
+            <div class="text-center py-4">
+                <span class="block text-slate-500 dark:text-slate-400 font-medium mb-3 uppercase tracking-widest text-xs">Tiempo Real en Reloj</span>
+                <span id="resultado_reloj" class="text-6xl font-extrabold text-teal-600 dark:text-teal-400 drop-shadow-sm">0h 00m</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Base de datos de tarifas extraída de las imágenes proporcionadas
+        const tarifas = {
+            logistica: {
+                2026: {
+                    ordinaria: 15.81,
+                    extra: 27.66,
+                    festiva: 3.95,
+                    nocturna: 7.11,
+                    extra_festiva: 31.62,
+                    extra_nocturna: 34.78
+                },
+                2027: {
+                    ordinaria: 16.28,
+                    extra: 28.48,
+                    festiva: 4.07,
+                    nocturna: 7.32,
+                    extra_festiva: 32.55,
+                    extra_nocturna: 35.81
+                }
+            },
+            especializado: {
+                2026: {
+                    ordinaria: 16.35,
+                    extra: 28.61,
+                    festiva: 4.09,
+                    nocturna: 7.36,
+                    extra_festiva: 32.70,
+                    extra_nocturna: 35.97
+                },
+                2027: {
+                    ordinaria: 16.83,
+                    extra: 29.46,
+                    festiva: 4.21,
+                    nocturna: 7.58,
+                    extra_festiva: 33.67,
+                    extra_nocturna: 37.04
+                }
+            },
+            torista: {
+                2026: {
+                    ordinaria: 17.91,
+                    extra: 31.34,
+                    festiva: 4.48,
+                    nocturna: 8.06,
+                    extra_festiva: 35.82,
+                    extra_nocturna: 39.40
+                },
+                2027: {
+                    ordinaria: 18.44,
+                    extra: 32.27,
+                    festiva: 4.61,
+                    nocturna: 8.30,
+                    extra_festiva: 36.88,
+                    extra_nocturna: 40.57
+                }
+            }
+        };
+
+        // Elementos del DOM
+        const elPuesto = document.getElementById('puesto');
+        const elAnyo = document.getElementById('anyo');
+        const elTipoHora = document.getElementById('tipo_hora');
+        const elCantidad = document.getElementById('cantidad');
+        const elResultadoEuros = document.getElementById('resultado_euros');
+        const elResultadoCompensar = document.getElementById('resultado_compensar');
+        const elCompensarInfo = document.getElementById('compensar_info');
+        const elValorHoraInfo = document.getElementById('valor_hora_info');
+
+        const themeToggleBtn = document.getElementById('theme-toggle');
+        const darkIcon = document.getElementById('theme-toggle-dark-icon');
+        const lightIcon = document.getElementById('theme-toggle-light-icon');
+        
+        // Nuevos elementos DOM para el Conversor
+        const viewToggleBtn = document.getElementById('view-toggle');
+        const iconConverter = document.getElementById('icon-converter');
+        const iconBack = document.getElementById('icon-back');
+        const viewCalculator = document.getElementById('view-calculator');
+        const viewConverter = document.getElementById('view-converter');
+        const mainTitle = document.getElementById('main-title');
+        const mainSubtitle = document.getElementById('main-subtitle');
+        const inputDecimales = document.getElementById('horas_decimales');
+        const resultadoReloj = document.getElementById('resultado_reloj');
+
+        // Inicializar iconos para Modo Oscuro por defecto
+        lightIcon.classList.remove('hidden');
+
+        // Lógica para el botón de cambio de tema
+        themeToggleBtn.addEventListener('click', function() {
+            darkIcon.classList.toggle('hidden');
+            lightIcon.classList.toggle('hidden');
+
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('color-theme', 'light');
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('color-theme', 'dark');
+            }
+        });
+
+        // Función principal de cálculo
+        function calcular() {
+            const puesto = elPuesto.value;
+            const anyo = parseInt(elAnyo.value);
+            const tipo = elTipoHora.value;
+            const cantidad = parseFloat(elCantidad.value) || 0; // Si está vacío, asume 0
+
+            // Obtener la tarifa correspondiente
+            let precioHora = tarifas[puesto][anyo][tipo];
+            
+            //            // Si se selecciona Hora Nocturna, es la Ordinaria + 45%
+            if (tipo === 'nocturna') {
+                const precioOrdinaria = tarifas[puesto][anyo]['ordinaria'];
+                precioHora = precioOrdinaria * 1.45; // Ordinaria + 45%
+            }
+            
+            // Actualizar la info de ayuda del precio aplicado
+            elValorHoraInfo.textContent = precioHora.toFixed(2) + ' €';
+
+            // Calcular total en euros
+            const totalEuros = precioHora * cantidad;
+            
+            // Mostrar resultado formateado
+            elResultadoEuros.textContent = totalEuros.toFixed(2) + ' €';
+
+            let multiplicador = 1;
+            let infoTexto = "";
+            
+            if (tipo === 'extra') {
+                multiplicador = 1.75;
+                infoTexto = "(Ratio: 1h = 1h 45m)";
+            } else if (tipo === 'extra_festiva') {
+                multiplicador = 2.25;
+                infoTexto = "(Ratio: 1h = 2h 15m)";
+            } else if (tipo === 'nocturna') {
+                multiplicador = 2;
+                infoTexto = "(Ratio: 1h = 2h)";
+            } else {
+                multiplicador = 1;
+                infoTexto = "(Ratio: 1h = 1h)";
+            }
+
+            if (cantidad > 0) {
+                // Multiplicamos las horas introducidas por el ratio (Base 100)
+                const totalCompensar = cantidad * multiplicador;
+                
+                // Mostramos el resultado en formato decimal con coma (ej: 1,75 Horas)
+                elResultadoCompensar.textContent = totalCompensar.toLocaleString('es-ES', { minimumFractionDigits: 0, maximumFractionDigits: 2 }) + ' Horas';
+                elCompensarInfo.textContent = infoTexto;
+            } else {
+                elResultadoCompensar.textContent = '--';
+                elCompensarInfo.textContent = "Introduce horas para calcular";
+            }
+        }
+
+        // Escuchar cambios en todos los inputs para recalcular en tiempo real
+        elPuesto.addEventListener('change', calcular);
+        elAnyo.addEventListener('change', calcular);
+        elTipoHora.addEventListener('change', calcular);
+        elCantidad.addEventListener('input', calcular); // 'input' se dispara al teclear
+
+        // === LÓGICA DEL CONVERSOR DE VISTAS ===
+        let isCalculatorView = true;
+
+        viewToggleBtn.addEventListener('click', function() {
+            isCalculatorView = !isCalculatorView;
+            if (isCalculatorView) {
+                // Mostrar Calculadora
+                viewCalculator.classList.remove('hidden');
+                viewConverter.classList.add('hidden');
+                mainTitle.textContent = 'Calculadora de Horas';
+                mainSubtitle.textContent = 'Massimo Dutti Logística';
+                iconConverter.classList.remove('hidden');
+                iconBack.classList.add('hidden');
+                viewToggleBtn.title = "Conversor Base 100 a 60";
+            } else {
+                // Mostrar Conversor
+                viewCalculator.classList.add('hidden');
+                viewConverter.classList.remove('hidden');
+                mainTitle.textContent = 'Conversor de Horas';
+                mainSubtitle.textContent = 'Base 100 ➔ Base 60';
+                iconConverter.classList.add('hidden');
+                iconBack.classList.remove('hidden');
+                viewToggleBtn.title = "Volver a la Calculadora";
+                
+                // Enfocar el input numérico al cambiar a esta pestaña si es posible
+                setTimeout(() => inputDecimales.focus(), 100);
+            }
+        });
+
+        // === LÓGICA DE CÁLCULO DEL CONVERSOR ===
+        function calcularConversion() {
+            const decimales = parseFloat(inputDecimales.value) || 0;
+            // Separar la parte entera (horas) de la decimal (minutos)
+            const horas = Math.floor(decimales);
+            const minutosDecimales = decimales - horas;
+            
+            // Multiplicamos por 60 para saber los minutos reales de reloj y redondeamos
+            const minutos = Math.round(minutosDecimales * 60);
+            
+            // Formateamos para que siempre salgan 2 dígitos (ej: "05m" en lugar de "5m")
+            const minutosFormateados = minutos.toString().padStart(2, '0');
+            
+            if (decimales > 0) {
+                resultadoReloj.textContent = `${horas}h ${minutosFormateados}m`;
+            } else {
+                resultadoReloj.textContent = '0h 00m';
+            }
+        }
+
+        inputDecimales.addEventListener('input', calcularConversion);
+
+        // Llamada inicial para establecer valores por defecto
+        calcular();
+    </script>
+</body>
+</html>

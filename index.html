@@ -69,9 +69,10 @@
                 <label for="tipo_hora" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Tipo de Hora</label>
                 <select id="tipo_hora" class="w-full border border-slate-300 dark:border-slate-600 rounded-lg p-3 bg-slate-50 dark:bg-slate-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors text-sm">
                     <option value="ordinaria">Hora Ordinaria</option>
-                    <option value="extra">Hora Extraordinaria (175% p.h.o)</option>
-                    <option value="extra_festiva">Hora extraordinaria festiva (200% p.h.o)</option>
                     <option value="nocturna">Hora Nocturna (Ordinaria + 45%)</option>
+                    <option value="extra">Hora Extraordinaria (175%)</option>
+                    <option value="extra_festiva">Hora Extraordinaria Festiva (200%)</option>
+                    <option value="extra_nocturna">Hora Extraordinaria Nocturna (h.extra + h.noct.)</option>
                 </select>
             </div>
 
@@ -234,15 +235,15 @@
             const puesto = elPuesto.value;
             const anyo = parseInt(elAnyo.value);
             const tipo = elTipoHora.value;
-            const cantidad = parseFloat(elCantidad.value) || 0; // Si está vacío, asume 0
+            const cantidad = parseFloat(elCantidad.value) || 0;
 
             // Obtener la tarifa correspondiente
             let precioHora = tarifas[puesto][anyo][tipo];
             
-            //            // Si se selecciona Hora Nocturna, es la Ordinaria + 45%
+            // Si se selecciona Hora Nocturna, es la Ordinaria + 45%
             if (tipo === 'nocturna') {
                 const precioOrdinaria = tarifas[puesto][anyo]['ordinaria'];
-                precioHora = precioOrdinaria * 1.45; // Ordinaria + 45%
+                precioHora = precioOrdinaria * 1.45; 
             }
             
             // Actualizar la info de ayuda del precio aplicado
@@ -250,12 +251,11 @@
 
             // Calcular total en euros
             const totalEuros = precioHora * cantidad;
-            
-            // Mostrar resultado formateado
             elResultadoEuros.textContent = totalEuros.toFixed(2) + ' €';
 
-            let multiplicador = 1;
+            let multiplicador = 0;
             let infoTexto = "";
+            let generaCompensacion = true;
             
             if (tipo === 'extra') {
                 multiplicador = 1.75;
@@ -263,19 +263,20 @@
             } else if (tipo === 'extra_festiva') {
                 multiplicador = 2.25;
                 infoTexto = "(Ratio: 1h = 2h 15m)";
-            } else if (tipo === 'nocturna') {
+            } else if (tipo === 'extra_nocturna') {
                 multiplicador = 2;
                 infoTexto = "(Ratio: 1h = 2h)";
             } else {
-                multiplicador = 1;
-                infoTexto = "(Ratio: 1h = 1h)";
+                // Ordinaria y nocturna no generan horas a compensar
+                generaCompensacion = false;
             }
 
-            if (cantidad > 0) {
-                // Multiplicamos las horas introducidas por el ratio (Base 100)
+            if (!generaCompensacion) {
+                elResultadoCompensar.textContent = '--';
+                elCompensarInfo.textContent = "No genera tiempo a compensar";
+            } else if (cantidad > 0) {
+                // Multiplicamos las horas introducidas por el ratio
                 const totalCompensar = cantidad * multiplicador;
-                
-                // Mostramos el resultado en formato decimal con coma (ej: 1,75 Horas)
                 elResultadoCompensar.textContent = totalCompensar.toLocaleString('es-ES', { minimumFractionDigits: 0, maximumFractionDigits: 2 }) + ' Horas';
                 elCompensarInfo.textContent = infoTexto;
             } else {
@@ -288,7 +289,7 @@
         elPuesto.addEventListener('change', calcular);
         elAnyo.addEventListener('change', calcular);
         elTipoHora.addEventListener('change', calcular);
-        elCantidad.addEventListener('input', calcular); // 'input' se dispara al teclear
+        elCantidad.addEventListener('input', calcular);
 
         // === LÓGICA DEL CONVERSOR DE VISTAS ===
         let isCalculatorView = true;
@@ -314,7 +315,6 @@
                 iconBack.classList.remove('hidden');
                 viewToggleBtn.title = "Volver a la Calculadora";
                 
-                // Enfocar el input numérico al cambiar a esta pestaña si es posible
                 setTimeout(() => inputDecimales.focus(), 100);
             }
         });
@@ -322,14 +322,9 @@
         // === LÓGICA DE CÁLCULO DEL CONVERSOR ===
         function calcularConversion() {
             const decimales = parseFloat(inputDecimales.value) || 0;
-            // Separar la parte entera (horas) de la decimal (minutos)
             const horas = Math.floor(decimales);
             const minutosDecimales = decimales - horas;
-            
-            // Multiplicamos por 60 para saber los minutos reales de reloj y redondeamos
             const minutos = Math.round(minutosDecimales * 60);
-            
-            // Formateamos para que siempre salgan 2 dígitos (ej: "05m" en lugar de "5m")
             const minutosFormateados = minutos.toString().padStart(2, '0');
             
             if (decimales > 0) {
